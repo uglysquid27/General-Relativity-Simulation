@@ -21,42 +21,52 @@ class SpaceMap3D:
         fig = plt.figure(figsize=(10, 10))
         ax = fig.add_subplot(111, projection='3d')
         
-        # Add points to the map
         for point in self.points:
             ax.text(point.x, point.y, point.z, f"{point.label if point.label else f'({point.x}, {point.y}, {point.z})'}", fontsize=12)
         
-        # Add a dot at the center to represent the black hole
-        ax.scatter([0], [0], [0], color='black', s=100)
-        
-        # Add a flat wireframe
+        self._add_black_hole(ax)
         self._add_wireframe(ax)
 
-        ax.set_title('3D Space Map with Flat Wireframe and Black Hole')
+        ax.set_title('3D Space Map with Warped Space-Time (Schwarzschild Metric)')
         ax.set_xlabel('X Coordinate')
         ax.set_ylabel('Y Coordinate')
         ax.set_zlabel('Z Coordinate')
         ax.grid(True)
         plt.show()
 
+    def _add_black_hole(self, ax):
+        ax.scatter([0], [0], [0], color='black', s=100)
+
     def _add_wireframe(self, ax):
-        # Create a grid of points for the wireframe
         x = np.linspace(-10, 10, 100)
         y = np.linspace(-10, 10, 100)
         X, Y = np.meshgrid(x, y)
-        Z = np.zeros_like(X)
+        r = np.sqrt(X**2 + Y**2)  
+
+        # Schwarzschild Metric Equation
+        # g_{00} = 1 - 2GM / (c^2 r)
+        # Where:
+        #   g_{00} is the time-time component of the metric tensor.
+        #   G is the gravitational constant.
+        #   M is the mass of the black hole.
+        #   c is the speed of light.
+        #   r is the radial distance from the center of the black hole.
         
-        # Plot the wireframe
+        G = 6.67430e-11 
+        M = 100 * 1.989e30  
+        c = 299792458  
+        potential = 1 - (2 * G * M) / (c**2 * r)
+
+        Z = np.zeros_like(X) + potential
+        
         ax.plot_wireframe(X, Y, Z, color='blue', alpha=0.5)
 
-# Example Usage
 if __name__ == "__main__":
     space_map = SpaceMap3D()
     
-    # Adding some points to the space map
     space_map.add_point(1, 2, 3, "A")
     space_map.add_point(3, 4, 5, "B")
     space_map.add_point(5, 7, 2, "C")
     space_map.add_point(2, 9, 4)
     
-    # Display the map with a flat wireframe and a black hole at the center
     space_map.display_map()
