@@ -24,42 +24,38 @@ class SpaceMap3D:
         for point in self.points:
             ax.text(point.x, point.y, point.z, f"{point.label if point.label else f'({point.x}, {point.y}, {point.z})'}", fontsize=12)
         
-        self._add_black_hole(ax)
-        self._add_wireframe(ax)
+        black_hole_coord, distortion_coord = self._add_wireframe(ax)  # Get coordinates
+
+        ax.scatter(*distortion_coord, color='blue', s=100, label='Distortion Coordinate')  # Plot distortion coordinate
+        ax.scatter(*black_hole_coord, color='black', s=100, label='Black Hole Coordinate')  # Plot black hole
 
         ax.set_title('3D Space Map with Warped Space-Time (Schwarzschild Metric)')
         ax.set_xlabel('X Coordinate')
         ax.set_ylabel('Y Coordinate')
         ax.set_zlabel('Z Coordinate')
         ax.grid(True)
-        plt.show()
+        ax.legend()
 
-    def _add_black_hole(self, ax):
-        ax.scatter([0], [0], [0], color='black', s=100)
+        plt.show()
 
     def _add_wireframe(self, ax):
         x = np.linspace(-10, 10, 100)
         y = np.linspace(-10, 10, 100)
         X, Y = np.meshgrid(x, y)
-        r = np.sqrt(X**2 + Y**2)  
+        r = np.sqrt(X**2 + Y**2 + 0**2) 
 
-        # Schwarzschild Metric Equation
-        # g_{00} = 1 - 2GM / (c^2 r)
-        # Where:
-        #   g_{00} is the time-time component of the metric tensor.
-        #   G is the gravitational constant.
-        #   M is the mass of the black hole.
-        #   c is the speed of light.
-        #   r is the radial distance from the center of the black hole.
-        
-        G = 6.67430e-11 
+        G = 6.67430e-11  
         M = 100 * 1.989e30  
         c = 299792458  
         potential = 1 - (2 * G * M) / (c**2 * r)
 
         Z = np.zeros_like(X) + potential
-        
         ax.plot_wireframe(X, Y, Z, color='blue', alpha=0.5)
+        distortion_coord = (0, 0, Z[50, 50])  
+
+        black_hole_coord = (0, 0, distortion_coord[2])
+
+        return black_hole_coord, distortion_coord
 
 if __name__ == "__main__":
     space_map = SpaceMap3D()
